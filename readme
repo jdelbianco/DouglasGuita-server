@@ -1,0 +1,37 @@
+como usar o prisma https://www.youtube.com/watch?v=hfbbjwxeoG0&t=1630s
+
+1 - Toda atualização dos schemas de atabelas, precisamos utilizar os seguintes comandos: 
+    npx prisma migrate dev --name init -> atualiza as tabelas no banco de dados
+    npx prisma generate -> cria o seu cliente com base em suas tabelas do schema
+
+2 - Se foi alterado direto dentro do banco de dados, é possivel alterar o projeto com o comando
+    npx prisma db pull
+
+
+3 - Modelo de importação prisma Client (arquivo type script)
+
+        import { prisma } from "./lib/prisma.js"; // precisa importar o prisma do arquivo lib/prisma.ts embora seja ts, importamos como .js por conta do node
+
+        async function teste() {
+        const users = await prisma.user.findMany();
+        console.log(users);
+        }
+
+        teste()
+
+4 - para fazer o comit automático 
+
+        git remote -v
+        git remote add origin https://github.com/jdelbianco/DouglasGuita-server.git
+
+5 -  Deploy do servidor 
+
+        I - Fazer o comit
+        II - Fazer o copy para a VPS -> git clone https://github.com/jdelbianco/DouglasGuita-server.git douglasGuitaServer
+        III - Entrar na pasta do projeto -> cd douglasGuitaServer
+        IV - Fazer o compose do docker -> docker compose up -d --build
+
+
+
+
+

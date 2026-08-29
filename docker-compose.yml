@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: backend_api
+    ports:
+      - "3000:3000" # Libera a porta 3000 da VPS apontando para a 3000 do container
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: proxy_reverso
+    ports:
+      - "8080:8080" # Libera a porta 8080 da VPS
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf # Injeta seu arquivo de configuração no Nginx
+    depends_on:
+      - api # Garante que o Nginx só ligue depois que a API estiver rodando
+    restart: unless-stopped

@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum Role {
+  STUDENT
+  TEACHER
+}
+
+model User {
+  id                String   @id @default(uuid())
+  name              String
+  email             String   @unique
+  password          String
+  profilePicture    Bytes?
+  role              Role     @default(STUDENT)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+
+  tasks            Task[]        @relation("StudentTasks")
+}
+
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  time        Int
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  studentId   String
+  student     User     @relation("StudentTasks", fields: [studentId], references: [id])
+  
+}
+
+
+model BackingTrack {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  youtubeUrl  String
+  createdAt   DateTime @default(now())
+
+}
+
+
+model MaterialPDF {
+  id        String   @id @default(uuid())
+  title     String
+  fileData  Bytes    
+  createdAt DateTime @default(now())
+}
