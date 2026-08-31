@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "npx tsx server.js"
+    "server": "npx tsx server.js",
+    "rep": "git remote add origin https://github.com/jdelbianco/DouglasGuita-server.git",
+    "pull": "git push origin main --force"
   },
   "keywords": [],
   "author": "",
