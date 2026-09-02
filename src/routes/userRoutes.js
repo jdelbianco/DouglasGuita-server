@@ -2,6 +2,7 @@ import express from 'express';
 import { prisma }  from "../../lib/prisma.js";
 import bcrypt from 'bcrypt';
 import multer from 'multer';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -11,9 +12,8 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 } // Limite de 5MB para a foto de perfil
 });
-
 // ==========================================
-// 1. POST - Criar Usuário (Agora aceitando foto)
+// 1. POST - Criar Usuário (Com senha criptografada)
 // ==========================================
 router.post('/', upload.single('profilePicture'), async (req, res) => {
   try {
@@ -24,10 +24,14 @@ router.post('/', upload.single('profilePicture'), async (req, res) => {
       return res.status(400).json({ error: 'Os campos name, email e password são obrigatórios.' });
     }
 
+    // Gerando o hash da senha usando o bcrypt
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const userData = {
       name,
       email,
-      password,
+      password: hashedPassword, // Substitui a senha em texto puro pelo hash seguro
       role: role || 'STUDENT'
     };
 
@@ -58,11 +62,10 @@ router.post('/', upload.single('profilePicture'), async (req, res) => {
     return res.status(500).json({ error: 'Erro interno ao criar usuário.' });
   }
 });
-
 // ==========================================
 // 2. GET - Listar todos os usuários
 // ==========================================
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -82,7 +85,7 @@ router.get('/', async (req, res) => {
 // ==========================================
 // 3. GET - Buscar detalhes de um usuário específico
 // ==========================================
-router.get('/:user_id', async (req, res) => {
+router.get('/:user_id', verifyToken, async (req, res) => {
   try {
     const { user_id } = req.params;
     const user = await prisma.user.findUnique({
@@ -106,7 +109,7 @@ router.get('/:user_id', async (req, res) => {
 // ==========================================
 // 4. GET - Rota exclusiva para visualizar/carregar a foto de perfil
 // ==========================================
-router.get('/:user_id/picture', async (req, res) => {
+router.get('/:user_id/picture', verifyToken, async (req, res) => {
   try {
     const { user_id } = req.params;
 
@@ -132,7 +135,7 @@ router.get('/:user_id/picture', async (req, res) => {
 // ==========================================
 // 5. PUT - Atualizar Usuário (Aceitando troca de foto)
 // ==========================================
-router.put('/:user_id', upload.single('profilePicture'), async (req, res) => {
+router.put('/:user_id', verifyToken, upload.single('profilePicture'), async (req, res) => {
   try {
     const { user_id } = req.params;
     const { name, email, password, role } = req.body;
@@ -172,7 +175,7 @@ router.put('/:user_id', upload.single('profilePicture'), async (req, res) => {
 // ==========================================
 // 6. DELETE - Deletar Usuário
 // ==========================================
-router.delete('/:user_id', async (req, res) => {
+router.delete('/:user_id', verifyToken, async (req, res) => {
   try {
     const { user_id } = req.params;
     await prisma.user.delete({ where: { id: user_id } });

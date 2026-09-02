@@ -1,10 +1,11 @@
 import express from 'express';
 // Apagamos a importação do PrismaClient e trazemos o nosso db.js
 import { prisma } from "../../lib/prisma.js";
+import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
   try {
     // 1. Captura os dados enviados no corpo da requisição
     const { title, description, youtubeUrl } = req.body;
@@ -34,7 +35,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     const tracks = await prisma.backingTrack.findMany({
       orderBy: {
@@ -52,7 +53,7 @@ router.get('/', async (req, res) => {
 
 
 
-router.put('/:track_id', async (req, res) => {
+router.put('/:track_id', verifyToken, async (req, res) => {
   try {
     const { track_id } = req.params;
     const { title, description, youtubeUrl } = req.body;
@@ -88,7 +89,7 @@ router.put('/:track_id', async (req, res) => {
 });
 
 
-router.delete('/:track_id', async (req, res) => {
+router.delete('/:track_id', verifyToken, async (req, res) => {
   try {
     const { track_id } = req.params;
 

@@ -2,6 +2,7 @@ import express from 'express';
 // Apagamos a importação do PrismaClient e trazemos o nosso db.js
 import { prisma } from "../../lib/prisma.js";
 import multer from 'multer';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ const upload = multer({
 // ==========================================
 // 1. POST - Upload e criação do Material PDF
 // ==========================================
-router.post('/', upload.single('file'), async (req, res) => {
+router.post('/', verifyToken, upload.single('file'), async (req, res) => {
   try {
     const { title } = req.body;
     const file = req.file;
@@ -50,7 +51,7 @@ router.post('/', upload.single('file'), async (req, res) => {
 // ==========================================
 // 2. GET - Listar todos os materiais (Sem o binário do arquivo)
 // ==========================================
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     const materials = await prisma.materialPDF.findMany({
       select: {
@@ -74,7 +75,7 @@ router.get('/', async (req, res) => {
 // ==========================================
 // 3. GET - Buscar detalhes de um material específico pelo ID
 // ==========================================
-router.get('/:material_id', async (req, res) => {
+router.get('/:material_id', verifyToken, async (req, res) => {
   try {
     const { material_id } = req.params;
 
@@ -102,7 +103,7 @@ router.get('/:material_id', async (req, res) => {
 // ==========================================
 // 4. GET - Baixar/Visualizar o arquivo PDF propriamente dito
 // ==========================================
-router.get('/:material_id/download', async (req, res) => {
+router.get('/:material_id/download', verifyToken,async (req, res) => {
   try {
     const { material_id } = req.params;
 
@@ -130,7 +131,7 @@ router.get('/:material_id/download', async (req, res) => {
 // ==========================================
 // 5. PUT - Atualizar título ou o arquivo do material
 // ==========================================
-router.put('/:material_id', upload.single('file'), async (req, res) => {
+router.put('/:material_id', verifyToken, upload.single('file'), async (req, res) => {
   try {
     const { material_id } = req.params;
     const { title } = req.body;
@@ -169,7 +170,7 @@ router.put('/:material_id', upload.single('file'), async (req, res) => {
 // ==========================================
 // 6. DELETE - Remover o material do banco
 // ==========================================
-router.delete('/:material_id', async (req, res) => {
+router.delete('/:material_id', verifyToken, async (req, res) => {
   try {
     const { material_id } = req.params;
 
